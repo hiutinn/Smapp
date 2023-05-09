@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragment.SearchFragment"
+    android:background="@color/white"
+    >
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white">
+        <androidx.appcompat.widget.Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:id="@+id/toolBar"
+            android:background="@color/white"
+            android:elevation="4dp">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_name"
+                    android:layout_centerInParent="true"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorGreen"
+                    android:textStyle="bold"
+                    tools:ignore="RelativeOverlap" />
+                <ImageButton
+                    android:id="@+id/imgSend"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/send"
+                    android:layout_marginEnd="16dp"
+                    android:contentDescription="@null" />
+            </RelativeLayout>
+        </androidx.appcompat.widget.Toolbar>
+<!--        <com.google.android.material.textfield.TextInputLayout-->
+<!--            android:id="@+id/edtLayout"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_below="@+id/toolBar"-->
+<!--            android:layout_marginVertical="5dp">-->
+<!--            <com.google.android.material.textfield.TextInputEditText-->
+<!--                android:id="@+id/edtSearch"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"/>-->
+<!--        </com.google.android.material.textfield.TextInputLayout>-->
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/searchView"
+            android:layout_below="@+id/toolBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="5dp"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_below="@+id/searchView"
+            android:id="@+id/userRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    </RelativeLayout>
+
+</FrameLayout>
