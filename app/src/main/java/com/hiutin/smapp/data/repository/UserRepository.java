@@ -84,18 +84,15 @@ public class UserRepository {
                         return;
                     }
                     boolean check = false;
-                    assert value != null;
-                    ArrayList<String> following = (ArrayList<String>) value.get("following");
 
-                    if (following != null) {
-                        for (String followingUid : following) {
-                            if (followingUid.equals(uid)) {
-                                check = true;
-                                break;
-                            }
+                    ArrayList<String> following = (ArrayList<String>) value.get("following");
+                    if (following == null) following = new ArrayList<>();
+                    for (String followingUid : following) {
+                        if (followingUid.equals(uid)) {
+                            check = true;
+                            break;
                         }
                     }
-
 
                     followingMutableLiveData.setValue(check);
                 });
@@ -157,7 +154,8 @@ public class UserRepository {
                         ArrayList<String> following = userModel.getFollowing();
                         if (following == null)
                             following = new ArrayList<>();
-                        following.add(uid);
+                        if (!following.contains(uid))
+                            following.add(uid);
                         db.collection("users")
                                 .document(FirebaseAuth.getInstance().getUid())
                                 .update("following", following)
@@ -186,7 +184,7 @@ public class UserRepository {
                         db.collection("users")
                                 .document(FirebaseAuth.getInstance().getUid())
                                 .update("following", following)
-                                .addOnSuccessListener(unused -> Log.e("UserRepository", "Following successful"));
+                                .addOnSuccessListener(unused -> Log.e("UserRepository", "Unfollowing successful"));
                     } else {
                         Log.e("UserRepository", "Error fetching users", task.getException());
                     }

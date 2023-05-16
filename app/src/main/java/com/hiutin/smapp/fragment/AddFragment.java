@@ -1,29 +1,45 @@
 package com.hiutin.smapp.fragment;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.MediaController;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.hiutin.smapp.R;
 import com.hiutin.smapp.adapter.GalleryAdapter;
+import com.hiutin.smapp.data.model.PostModel;
 import com.hiutin.smapp.databinding.FragmentAddBinding;
 import com.hiutin.smapp.data.model.CommentModel;
+import com.hiutin.smapp.viewModel.AddFragmentViewModel;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -36,11 +52,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AddFragment extends Fragment {
-    private FragmentAddBinding binding;
-    private GalleryAdapter adapter;
-    private List<Uri> images;
-    private Uri mImageUri;
+public class AddFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
+    private static FragmentAddBinding binding;
+    private Uri imageUri = null;
+    private Uri videoUri = null;
+    private AddFragmentViewModel viewModel;
+    private static final int REQUEST_PICK_IMAGE = 1;
+    private static final int REQUEST_PICK_VIDEO = 2;
 
     public AddFragment() {
         // Required empty public constructor
@@ -56,122 +74,164 @@ public class AddFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = FragmentAddBinding.inflate(inflater, container, false);
-        View view = binding.getRoot();
-        return view;
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        binding.recyclerView.setHasFixedSize(true);
-        images = new ArrayList<>();
-        adapter = new GalleryAdapter(requireContext(), images);
-        binding.recyclerView.setAdapter(adapter);
-        getImages();
-        clickListener();
-    }
-
-
-    private void getImages() {
-        getActivity().runOnUiThread(() -> {
-            Dexter.withContext(requireContext())
-                    .withPermissions(
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE
-                    ).withListener(new MultiplePermissionsListener() {
-                        @Override
-                        public void onPermissionsChecked(MultiplePermissionsReport report) {
-                            if (report.areAllPermissionsGranted()) {
-                                File directory = new File(Environment.getExternalStorageDirectory().toString() + "/DCIM");
-                                if (directory.exists()) {
-                                    File[] subDirectories = directory.listFiles();
-
-                                    assert subDirectories != null;
-                                    for (File dereFile : subDirectories) {
-                                        File[] files = dereFile.listFiles();
-                                        assert files != null;
-                                        for (File file : files) {
-                                            if (file.getAbsolutePath().endsWith(".jpg") || file.getAbsolutePath().endsWith(".png")) {
-                                                images.add(Uri.fromFile(file));
-                                                adapter.notifyDataSetChanged();
-                                            }
-                                        }
-                                    }
-                                }
-                                File pictureDirectory = new File(Environment.getExternalStorageDirectory().toString() + "/Pictures");
-                                if (pictureDirectory.exists()) {
-                                    File[] pics = pictureDirectory.listFiles();
-
-                                    assert pics != null;
-                                    for (File file : pics) {
-                                        if (file.getAbsolutePath().endsWith(".jpg") || file.getAbsolutePath().endsWith(".png")) {
-                                            images.add(Uri.fromFile(file));
-                                            adapter.notifyDataSetChanged();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {/* ... */}
-                    }).check();
-        });
-    }
-
-    private void clickListener() {
-        adapter.sendImage(imageUri -> {
-            mImageUri = imageUri;
+        viewModel = new ViewModelProvider(requireActivity()).get(AddFragmentViewModel.class);
+        viewModel.getCurrentUserLiveData().observe(getViewLifecycleOwner(), user -> {
             Glide.with(requireContext())
-                    .load(mImageUri)
-                    .into(binding.ivPostImage);
-            binding.ivPostImage.setVisibility(View.VISIBLE);
-            binding.btnNext.setVisibility(View.VISIBLE);
+                    .load(user.getAvatar())
+                    .placeholder(R.drawable.user)
+                    .into(binding.imgUserAvatar);
+            binding.tvUserName.setText(user.getName());
+        });
+        MediaController mediaController = new MediaController(requireContext());
+        mediaController.setAnchorView(binding.vd);
+        binding.vd.setMediaController(mediaController);
+        binding.edtCaption.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (!binding.edtCaption.getText().toString().isEmpty()) {
+                    binding.btnPost.setEnabled(true);
+                    binding.btnPost.setBackgroundColor(Color.parseColor("#000000"));
+                } else {
+                    binding.btnPost.setEnabled(false);
+                    binding.btnPost.setBackgroundColor(Color.parseColor("#cccccc"));
+                }
+                if (binding.edtCaption.getLineCount() > 3) {
+                    binding.edtCaption.setTextSize(20);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
         });
 
-        binding.btnNext.setOnClickListener(v -> {
-            binding.progressBar.setVisibility(View.VISIBLE);
-            binding.btnNext.setVisibility(View.GONE);
-            FirebaseStorage storage = FirebaseStorage.getInstance();
-            StorageReference storageReference = storage.getReference().child("PostImages/" + System.currentTimeMillis());
+        binding.btnChoose.setOnClickListener(this::showPopUpMenu);
 
-            storageReference.putFile(mImageUri).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    storageReference.getDownloadUrl()
-                            .addOnSuccessListener(uri -> uploadData(uri.toString()));
-                }
-            });
+        binding.btnPost.setOnClickListener(v -> {
+            createPost();
         });
     }
 
-    private void uploadData(String imageURL) {
-        CollectionReference collectionReference
-                = FirebaseFirestore.getInstance()
-                .collection("posts");
-        String id = collectionReference.document().getId();
-        ArrayList<String> likes = new ArrayList<>();
-        ArrayList<CommentModel> comments = new ArrayList<>();
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", id);
-        map.put("uid", FirebaseAuth.getInstance().getUid());
-        map.put("postImage", imageURL);
-        map.put("caption", binding.edtDescription.getText().toString());
-        map.put("timestamp", FieldValue.serverTimestamp());
-        map.put("likes", likes);
-        map.put("comments", comments);
+    private void createPost() {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        if (imageUri != null) {
+            StorageReference storageReference = storage.getReference().child("PostImages/" + System.currentTimeMillis());
+            storageReference
+                    .putFile(imageUri)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            storageReference.getDownloadUrl()
+                                    .addOnSuccessListener(uri -> uploadData(uri.toString()));
+                        }
+                    });
+            return;
+        }
 
-        collectionReference.document(id).set(map)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Toast.makeText(requireContext(), "Upload post successfully", Toast.LENGTH_SHORT).show();
-                        binding.progressBar.setVisibility(View.GONE);
-                        binding.ivPostImage.setVisibility(View.GONE);
-                        binding.edtDescription.setText("");
-                        binding.btnNext.setVisibility(View.GONE);
-                    } else {
-                        Toast.makeText(requireContext(), "Error: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                });
+        if (videoUri != null) {
+            StorageReference storageReference = storage.getReference().child("VideoImages/" + System.currentTimeMillis());
+            storageReference
+                    .putFile(videoUri)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            storageReference.getDownloadUrl()
+                                    .addOnSuccessListener(uri -> uploadData(uri.toString()));
+                        }
+                    });
+            return;
+        }
+         uploadData(null);
+
+    }
+
+    private void uploadData(String url) {
+        String id = FirebaseFirestore.getInstance()
+                .collection("posts").document().getId();
+        ArrayList<String> likes = new ArrayList<>();
+
+        PostModel newPost = new PostModel();
+        newPost.setId(id);
+        newPost.setCaption(binding.edtCaption.getText().toString());
+        newPost.setLikes(likes);
+        if (imageUri != null)
+            newPost.setPostImage(url);
+
+        if (videoUri != null)
+            newPost.setPostVideo(url);
+        Timestamp timestamp = Timestamp.now();
+        newPost.setTimestamp(timestamp.toDate());
+        newPost.setUid(FirebaseAuth.getInstance().getUid());
+
+        viewModel.addPost(newPost);
+        resetInput();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_PICK_IMAGE && data != null) {
+                Uri selectedImageUri = data.getData();
+                // Xử lý đường dẫn hình ảnh được chọn ở đây
+                binding.vdLayout.setVisibility(View.GONE);
+                binding.img.setImageURI(selectedImageUri);
+                binding.img.setVisibility(View.VISIBLE);
+                imageUri = selectedImageUri;
+            } else if (requestCode == REQUEST_PICK_VIDEO && data != null) {
+                Uri selectedVideoUri = data.getData();
+                // Xử lý đường dẫn video được chọn ở đây
+                binding.img.setVisibility(View.GONE);
+                binding.vd.setVideoURI(selectedVideoUri);
+                binding.vdLayout.setVisibility(View.VISIBLE);
+                videoUri = selectedVideoUri;
+//                binding.vd.start();
+            }
+        }
+    }
+
+    public static void resetInput() {
+        binding.edtCaption.setText("");
+        binding.img.setImageURI(null);
+        binding.img.setVisibility(View.GONE);
+        binding.vd.setVideoURI(null);
+        binding.vdLayout.setVisibility(View.GONE);
+    }
+
+    private void showPopUpMenu(View v) {
+        PopupMenu popup = new PopupMenu(requireContext(), v);
+
+        // This activity implements OnMenuItemClickListener
+        popup.setOnMenuItemClickListener(this);
+        popup.inflate(R.menu.add_choose_image_or_video);
+        popup.show();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
+            case R.id.choose_image:
+                Intent imageIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(imageIntent, REQUEST_PICK_IMAGE);
+                return true;
+            case R.id.choose_video:
+                Intent videoIntent = new Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(videoIntent, REQUEST_PICK_VIDEO);
+                return true;
+            default:
+                return false;
+        }
     }
 }

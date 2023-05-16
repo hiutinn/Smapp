@@ -111,6 +111,7 @@ public class HomeFragment extends Fragment {
         binding.btnComment.setOnClickListener(v -> {
             if (binding.edtComment.getText().toString().isEmpty())
                 return;
+
             CollectionReference commentRef = FirebaseFirestore.getInstance()
                     .collection("posts")
                     .document(selectedPostId)
@@ -125,21 +126,7 @@ public class HomeFragment extends Fragment {
             comment.setTimestamp(timestamp.toDate());
 
             viewModel.addComment(selectedPostId, comment);
+            binding.edtComment.setText(null);
         });
     }
-
-//    @Override
-//    public void onStop() {
-//        super.onStop();
-//        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
-//            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-//        }
-//    }
-//    @Override
-//    public void onPause() {
-//        super.onPause();
-//        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
-//            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-//        }
-//    }
 }
