@@ -29,9 +29,8 @@ public class HomeFragmentViewModel extends AndroidViewModel {
     public LiveData<List<PostModel>> getPostsLiveData(String uid) {
         if (postsLiveData == null) {
             postsLiveData = new MutableLiveData<>();
-            loadPostsByFollowing(uid);
         }
-
+        loadPostsByFollowing(uid);
         return postsLiveData;
     }
 
@@ -50,8 +49,8 @@ public class HomeFragmentViewModel extends AndroidViewModel {
     public MutableLiveData<List<CommentModel>> getPostCommentsLiveData(String postId) {
         if (postCommentsLiveData == null) {
             postCommentsLiveData = new MutableLiveData<>();
-            loadPostComments(postId);
         }
+        loadPostComments(postId);
         return postCommentsLiveData;
     }
 

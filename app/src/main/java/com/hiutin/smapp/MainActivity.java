@@ -15,6 +15,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.hiutin.smapp.adapter.ViewPagerAdapter;
 import com.hiutin.smapp.databinding.ActivityMainBinding;
+import com.hiutin.smapp.fragment.AddFragment;
 import com.hiutin.smapp.fragment.HomeFragment;
 import com.hiutin.smapp.fragment.ProfileFragment;
 import com.hiutin.smapp.viewModel.ProfileFragmentViewModel;
@@ -88,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case 2:
                         tab.setIcon(R.drawable.add);
+                        AddFragment.resetInput();
                         break;
                     case 3:
                         tab.setIcon(R.drawable.heart);

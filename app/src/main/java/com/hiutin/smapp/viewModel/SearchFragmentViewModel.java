@@ -12,9 +12,10 @@ import com.hiutin.smapp.data.repository.UserRepository;
 import java.util.List;
 
 public class SearchFragmentViewModel extends AndroidViewModel {
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
     private MutableLiveData<List<UserModel>> allUsersMutableLiveData;
     private MutableLiveData<List<UserModel>> searchResultMutableLiveData;
+    private MutableLiveData<Boolean> isFollowing;
     public SearchFragmentViewModel(@NonNull Application application) {
         super(application);
         userRepository = new UserRepository();
@@ -43,5 +44,23 @@ public class SearchFragmentViewModel extends AndroidViewModel {
             allUsersMutableLiveData.setValue(users);
         });
         return allUsersMutableLiveData;
+    }
+
+    public MutableLiveData<Boolean> getIsFollowing(String uid) {
+        if (isFollowing == null) {
+            isFollowing = new MutableLiveData<>();
+        }
+        userRepository.checkFollowing(uid).observeForever(check -> {
+            isFollowing.setValue(check);
+        });
+        return isFollowing;
+    }
+
+    public void follow(String uid) {
+        userRepository.follow(uid);
+    }
+
+    public void unfollow(String uid) {
+        userRepository.unfollow(uid);
     }
 }

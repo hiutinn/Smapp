@@ -60,7 +60,7 @@ public class PostDetailActivity extends AppCompatActivity {
 
     private void addComment() {
         if (binding.edtComment.getText().toString().isEmpty()) return;
-        binding.edtComment.setText("");
+
         CollectionReference commentRef = FirebaseFirestore.getInstance()
                 .collection("posts")
                 .document(postId)
@@ -75,6 +75,7 @@ public class PostDetailActivity extends AppCompatActivity {
         comment.setTimestamp(timestamp.toDate());
 
         viewModel.addComment(postId, comment);
+        binding.edtComment.setText("");
     }
 
     private void loadPostInformation(PostModel post) {

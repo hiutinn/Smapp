@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class PostModel {
-    private String id, postImage, uid, caption;
+    private String id, postImage, uid, caption, postVideo;
     @ServerTimestamp
     private Date timestamp;
     private ArrayList<String> likes;
@@ -14,11 +14,12 @@ public class PostModel {
     public PostModel() {
     }
 
-    public PostModel(String id, String postImage, String uid, String caption, Date timestamp, ArrayList<String> likes) {
+    public PostModel(String id, String postImage, String uid, String caption, String postVideo, Date timestamp, ArrayList<String> likes) {
         this.id = id;
         this.postImage = postImage;
         this.uid = uid;
         this.caption = caption;
+        this.postVideo = postVideo;
         this.timestamp = timestamp;
         this.likes = likes;
     }
@@ -69,5 +70,13 @@ public class PostModel {
 
     public void setCaption(String caption) {
         this.caption = caption;
+    }
+
+    public String getPostVideo() {
+        return postVideo;
+    }
+
+    public void setPostVideo(String postVideo) {
+        this.postVideo = postVideo;
     }
 }
