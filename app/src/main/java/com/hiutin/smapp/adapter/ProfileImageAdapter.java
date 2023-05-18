@@ -19,8 +19,8 @@ import java.util.List;
 
 public class ProfileImageAdapter extends RecyclerView.Adapter<ProfileImageAdapter.ProfileImageViewHolder> {
 
-    private Context context;
-    private List<PostModel> posts;
+    private final Context context;
+    private final List<PostModel> posts;
 
     public ProfileImageAdapter(Context context, List<PostModel> posts) {
         this.context = context;
@@ -35,13 +35,20 @@ public class ProfileImageAdapter extends RecyclerView.Adapter<ProfileImageAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ProfileImageViewHolder holder, int position) {
-        PostModel postModel = posts.get(position);
-        Glide.with(context)
-                .load(postModel.getPostImage())
-                .into(holder.binding.postImage);
+        PostModel post = posts.get(position);
+
+        if (post.getPostImage() != null) {
+            Glide.with(context)
+                    .load(post.getPostImage())
+                    .into(holder.binding.postImage);
+        }
+
+        if (post.getPostVideo() != null) {
+
+        }
         holder.binding.postImage.setOnClickListener(v -> {
             Intent postDetailIntent = new Intent(context, PostDetailActivity.class);
-            postDetailIntent.putExtra("postId", postModel.getId());
+            postDetailIntent.putExtra("postId", post.getId());
             context.startActivity(postDetailIntent);
         });
     }

@@ -34,6 +34,7 @@ import com.hiutin.smapp.databinding.FragmentLoginBinding;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class LoginFragment extends Fragment {
     private FragmentLoginBinding binding;
@@ -159,13 +160,16 @@ public class LoginFragment extends Fragment {
         auth.signInWithCredential(credential).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(requireActivity());
-                DocumentReference docRef = FirebaseFirestore.getInstance().collection("users").document(account.getId());
+                DocumentReference docRef = FirebaseFirestore.getInstance()
+                        .collection("users")
+                        .document(Objects.requireNonNull(account.getId()));
                 docRef.get().addOnCompleteListener(task12 -> {
                     if (task12.isSuccessful()) {
                         DocumentSnapshot document = task12.getResult();
                         if (document.exists()) {
                             alertDialog.dismiss();
                             Snackbar.make(binding.getRoot(), "Log in success", Toast.LENGTH_SHORT).show();
+                            Log.d("TAG", "Log in success 1");
                             startActivity(new Intent(getContext(), MainActivity.class));
                             getActivity().finish();
                         } else {
@@ -179,6 +183,7 @@ public class LoginFragment extends Fragment {
                                     .addOnCompleteListener(task1 -> {
                                         if (task1.isSuccessful()) {
                                             alertDialog.dismiss();
+                                            Log.d("TAG", "Log in success 1");
                                             Snackbar.make(binding.getRoot(), "Log in success", Toast.LENGTH_SHORT).show();
                                             startActivity(new Intent(getContext(), MainActivity.class));
                                             getActivity().finish();

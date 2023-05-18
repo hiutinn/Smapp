@@ -1,14 +1,18 @@
 package com.hiutin.smapp.fragment;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,18 +28,20 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.hiutin.smapp.FragmentReplaceActivity;
 import com.hiutin.smapp.MainActivity;
 import com.hiutin.smapp.R;
 import com.hiutin.smapp.adapter.ProfileImageAdapter;
 import com.hiutin.smapp.databinding.FragmentProfileBinding;
 import com.hiutin.smapp.data.model.PostModel;
+import com.hiutin.smapp.dialog.ConfirmDialog;
 import com.hiutin.smapp.viewModel.ProfileFragmentViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class ProfileFragment extends Fragment {
+public class ProfileFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
     private FragmentProfileBinding binding;
     private boolean isMyProfile;
     private static ProfileFragmentViewModel viewModel;
@@ -73,10 +79,12 @@ public class ProfileFragment extends Fragment {
                 binding.btnFollow.setVisibility(View.GONE);
                 binding.countLayout.setVisibility(View.VISIBLE);
                 binding.btnBack.setVisibility(View.GONE);
+                binding.imgMenu.setVisibility(View.VISIBLE);
             } else {
                 binding.btnFollow.setVisibility(View.VISIBLE);
                 binding.countLayout.setVisibility(View.GONE);
                 binding.btnBack.setVisibility(View.VISIBLE);
+                binding.imgMenu.setVisibility(View.GONE);
                 followButtonHandler(uid);
             }
         });
@@ -84,6 +92,7 @@ public class ProfileFragment extends Fragment {
             viewModel.setUserId(FirebaseAuth.getInstance().getUid());
             MainActivity.setFragment(0);
         });
+        binding.imgMenu.setOnClickListener(this::showPopUpMenu);
     }
 
     private void followButtonHandler(String uid) {
@@ -107,10 +116,8 @@ public class ProfileFragment extends Fragment {
     }
 
     private void loadBasicData(String uid) {
-        Log.e("TAG", "uid: " + uid );
         viewModel.getUserMutableLiveData(uid)
                 .observe(getViewLifecycleOwner(), user -> {
-                    Log.e("TAG", "user id: " + user.getUid() );
                     Glide.with(requireActivity()).load(user.getAvatar()).centerCrop().timeout(7000).placeholder(R.drawable.user).into(binding.profileImage);
                     binding.tvUserName.setText(user.getName());
                     if (!Objects.equals(user.getStatus(), "")) binding.tvStatus.setText(user.getStatus());
@@ -131,9 +138,35 @@ public class ProfileFragment extends Fragment {
         });
     }
 
+    private void showPopUpMenu(View v) {
+        PopupMenu popup = new PopupMenu(requireContext(), v);
+
+        // This activity implements OnMenuItemClickListener
+        popup.setOnMenuItemClickListener(this);
+        popup.inflate(R.menu.profile_option_menu);
+        popup.show();
+    }
+
+    @SuppressLint("NonConstantResourceId")
     @Override
-    public void onStop() {
-        super.onStop();
-        resetProfileScreen();
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
+            case R.id.profile_opt_edit:
+                return true;
+            case R.id.profile_opt_logout:
+                logout();
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private void logout() {
+        ConfirmDialog confirmDialog = new ConfirmDialog(requireActivity(), "You want to logout ?", () -> {
+            FirebaseAuth.getInstance().signOut();
+            startActivity(new Intent(requireActivity(), FragmentReplaceActivity.class));
+            requireActivity().finish();
+        });
+        confirmDialog.show();
     }
 }

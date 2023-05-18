@@ -7,9 +7,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.MediaController;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -73,13 +75,27 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         holder.binding.tvCaption.setText(post.getCaption());
         Random random = new Random();
         int color = Color.argb(255, random.nextInt(256), random.nextInt(256), random.nextInt(256));
-        Glide
-                .with(context)
-                .load(post.getPostImage())
-                .centerCrop()
-                .timeout(7000)
-                .placeholder(new ColorDrawable(color))
-                .into(holder.binding.imgPost);
+        if (post.getPostImage() != null) {
+            holder.binding.vdPost.setVisibility(View.GONE);
+            holder.binding.imgPost.setVisibility(View.VISIBLE);
+            Glide
+                    .with(context)
+                    .load(post.getPostImage())
+                    .centerCrop()
+                    .timeout(7000)
+                    .placeholder(new ColorDrawable(color))
+                    .into(holder.binding.imgPost);
+        }
+
+        if (post.getPostVideo() != null) {
+            holder.binding.imgPost.setVisibility(View.GONE);
+            holder.binding.vdPost.setVisibility(View.VISIBLE);
+            MediaController mediaController = new MediaController(context);
+            mediaController.setAnchorView(holder.binding.vdPost);
+            holder.binding.vdPost.setVideoPath(post.getPostVideo());
+            holder.binding.vdPost.setMediaController(mediaController);
+        }
+
         holder.binding.tvTime.setText(getTime(post.getTimestamp()));
         // Handle like button and text
         ArrayList<String> likes = post.getLikes();
@@ -118,11 +134,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             iOnCommentClick.onComment(post.getId());
         });
 
-        holder.itemView.setOnClickListener(v -> {
-            Intent postDetailIntent = new Intent(context, PostDetailActivity.class);
-            postDetailIntent.putExtra("postId", post.getId());
-            context.startActivity(postDetailIntent);
-        });
+//        holder.itemView.setOnClickListener(v -> {
+//            Intent postDetailIntent = new Intent(context, PostDetailActivity.class);
+//            postDetailIntent.putExtra("postId", post.getId());
+//            context.startActivity(postDetailIntent);
+//        });
     }
 
 
@@ -131,8 +147,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         return posts.size();
     }
 
-    static class PostViewHolder extends RecyclerView.ViewHolder {
-        PostItemBinding binding;
+    public static class PostViewHolder extends RecyclerView.ViewHolder {
+        public PostItemBinding binding;
 
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);

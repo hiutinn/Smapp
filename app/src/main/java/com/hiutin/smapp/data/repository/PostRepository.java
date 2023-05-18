@@ -69,6 +69,7 @@ public class PostRepository {
 
         db.collection(COLLECTION_NAME)
                 .whereIn("uid", following)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<PostModel> postList = new ArrayList<>();

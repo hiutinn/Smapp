@@ -39,6 +39,7 @@ import com.hiutin.smapp.adapter.GalleryAdapter;
 import com.hiutin.smapp.data.model.PostModel;
 import com.hiutin.smapp.databinding.FragmentAddBinding;
 import com.hiutin.smapp.data.model.CommentModel;
+import com.hiutin.smapp.dialog.LoadingDialog;
 import com.hiutin.smapp.viewModel.AddFragmentViewModel;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
@@ -59,7 +60,7 @@ public class AddFragment extends Fragment implements PopupMenu.OnMenuItemClickLi
     private AddFragmentViewModel viewModel;
     private static final int REQUEST_PICK_IMAGE = 1;
     private static final int REQUEST_PICK_VIDEO = 2;
-
+    private LoadingDialog loadingDialog;
     public AddFragment() {
         // Required empty public constructor
     }
@@ -80,6 +81,7 @@ public class AddFragment extends Fragment implements PopupMenu.OnMenuItemClickLi
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        loadingDialog = new LoadingDialog(requireContext());
         viewModel = new ViewModelProvider(requireActivity()).get(AddFragmentViewModel.class);
         viewModel.getCurrentUserLiveData().observe(getViewLifecycleOwner(), user -> {
             Glide.with(requireContext())
@@ -120,6 +122,7 @@ public class AddFragment extends Fragment implements PopupMenu.OnMenuItemClickLi
         binding.btnChoose.setOnClickListener(this::showPopUpMenu);
 
         binding.btnPost.setOnClickListener(v -> {
+            loadingDialog.show();
             createPost();
         });
     }
@@ -175,6 +178,7 @@ public class AddFragment extends Fragment implements PopupMenu.OnMenuItemClickLi
 
         viewModel.addPost(newPost);
         resetInput();
+        loadingDialog.dismiss();
     }
 
     @Override

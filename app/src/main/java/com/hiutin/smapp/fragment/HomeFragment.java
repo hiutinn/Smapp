@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -128,5 +129,35 @@ public class HomeFragment extends Fragment {
             viewModel.addComment(selectedPostId, comment);
             binding.edtComment.setText(null);
         });
+
+        // Play video when it appear
+        binding.postRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+
+                if (layoutManager == null) return;
+                // Get the first visible item position
+                int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+
+                // Get the last visible item position
+                int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
+
+                // Iterate through the visible items and check if they are appearing for the first time
+                for (int i = firstVisibleItemPosition; i <= lastVisibleItemPosition; i++) {
+                    PostAdapter.PostViewHolder viewHolder = (PostAdapter.PostViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+                    if (viewHolder != null && viewHolder.itemView.getTag() == null) {
+                        // This item is appearing for the first time, do something with it
+                        viewHolder.itemView.setTag(true);
+                        // Your code to handle appearance event of the item
+                        if (viewHolder.binding.vdPost.getVisibility() == View.VISIBLE)
+                            viewHolder.binding.vdPost.start();
+                    }
+                }
+            }
+        });
     }
+
 }
