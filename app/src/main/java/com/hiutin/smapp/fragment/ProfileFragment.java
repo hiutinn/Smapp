@@ -24,6 +24,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.hiutin.smapp.FragmentReplaceActivity;
 import com.hiutin.smapp.MainActivity;
+import com.hiutin.smapp.ProfileDetailActivity;
 import com.hiutin.smapp.R;
 import com.hiutin.smapp.adapter.ProfileImageAdapter;
 import com.hiutin.smapp.adapter.SearchAdapter;
@@ -180,6 +181,7 @@ public class ProfileFragment extends Fragment implements PopupMenu.OnMenuItemCli
     public boolean onMenuItemClick(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.profile_opt_edit:
+                editProfile();
                 return true;
             case R.id.profile_opt_logout:
                 logout();
@@ -187,6 +189,12 @@ public class ProfileFragment extends Fragment implements PopupMenu.OnMenuItemCli
             default:
                 return false;
         }
+    }
+
+    private void editProfile() {
+        Intent intent = new Intent(requireActivity(), ProfileDetailActivity.class);
+        startActivity(intent);
+
     }
 
     private void logout() {
