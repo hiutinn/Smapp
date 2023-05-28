@@ -31,6 +31,7 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
                 return new NotificationFragment();
             case 4:
                 return new ProfileFragment();
+
         }
         return new HomeFragment();
     }

@@ -22,6 +22,9 @@ public class ProfileFragmentViewModel extends AndroidViewModel {
     private MutableLiveData<List<PostModel>> postsMutableLiveData;
     private MutableLiveData<String> userIdMutableLiveData;
     private MutableLiveData<Boolean> checkFollowingMutableData;
+    private MutableLiveData<List<UserModel>> getAllFollowingUser;
+
+    private MutableLiveData<List<UserModel>> getAllFollowerUser;
     public ProfileFragmentViewModel(@NonNull Application application) {
         super(application);
         userRepository = new UserRepository();
@@ -72,11 +75,31 @@ public class ProfileFragmentViewModel extends AndroidViewModel {
         userIdMutableLiveData.setValue(uid);
     }
 
+
+
     public void follow(String uid) {
         userRepository.follow(uid);
     }
 
     public void unfollow(String uid) {
         userRepository.unfollow(uid);
+    }
+    public MutableLiveData<List<UserModel>> getAllFollowingUser() {
+        if(getAllFollowingUser == null){
+            getAllFollowingUser = new MutableLiveData<>();
+            userRepository.getUserByFollowing().observeForever(listUser ->{
+                getAllFollowingUser.setValue(listUser);
+            });
+        }
+        return getAllFollowingUser;
+    }
+    public MutableLiveData<List<UserModel>> getAllFollowerUser() {
+        if(getAllFollowerUser == null){
+            getAllFollowerUser = new MutableLiveData<>();
+            userRepository.getUserByFollowers().observeForever(listUser ->{
+                getAllFollowerUser.setValue(listUser);
+            });
+        }
+        return getAllFollowerUser;
     }
 }

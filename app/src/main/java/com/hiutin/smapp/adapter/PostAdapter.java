@@ -4,10 +4,9 @@ import static com.hiutin.smapp.utils.TimeHelper.getTime;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,15 +17,14 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.hiutin.smapp.PostDetailActivity;
 import com.hiutin.smapp.R;
+import com.hiutin.smapp.data.model.NotificationModel;
+import com.hiutin.smapp.data.repository.NotificationRepository;
 import com.hiutin.smapp.databinding.PostItemBinding;
-import com.hiutin.smapp.data.model.CommentModel;
 import com.hiutin.smapp.data.model.PostModel;
 import com.hiutin.smapp.data.model.UserModel;
 
@@ -38,6 +36,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     private final Context context;
     private final List<PostModel> posts;
     private IOnCommentClick iOnCommentClick;
+    NotificationModel model;
 
     public PostAdapter(Context context, List<PostModel> posts) {
         this.context = context;
@@ -53,7 +52,9 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     @SuppressLint({"SetTextI18n", "NotifyDataSetChanged"})
     @Override
     public void onBindViewHolder(@NonNull PostViewHolder holder, int position) {
+
         PostModel post = posts.get(position);
+
         DocumentReference reference = FirebaseFirestore.getInstance().collection("users").document(post.getUid());
         DocumentReference postRef = FirebaseFirestore.getInstance().collection("posts").document(post.getId());
         reference.get().addOnCompleteListener(task -> {
@@ -127,6 +128,12 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                 likes.add(FirebaseAuth.getInstance().getUid());
                 postRef.update("likes", likes);
                 notifyDataSetChanged();
+                NotificationRepository notificationRepository = new NotificationRepository();
+                List<String> listUser = new ArrayList<>();
+                listUser.add(post.getUid());
+                Timestamp timestamp = Timestamp.now();
+                model = new NotificationModel(FirebaseAuth.getInstance().getUid(), "đã like bài viết: "+holder.binding.tvCaption.getText(), post.getId(), listUser, timestamp);
+                notificationRepository.addNotification(context,model,"đã like bài viết của bạn");
             });
         }
 

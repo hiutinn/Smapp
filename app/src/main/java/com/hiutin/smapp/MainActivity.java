@@ -2,26 +2,41 @@ package com.hiutin.smapp;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.hiutin.smapp.adapter.ViewPagerAdapter;
+import com.hiutin.smapp.data.model.UserModel;
 import com.hiutin.smapp.databinding.ActivityMainBinding;
 import com.hiutin.smapp.fragment.AddFragment;
 import com.hiutin.smapp.fragment.HomeFragment;
 import com.hiutin.smapp.fragment.ProfileFragment;
 import com.hiutin.smapp.viewModel.ProfileFragmentViewModel;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
-    private static ActivityMainBinding binding;
+    public static ActivityMainBinding binding;
+    private FirebaseFirestore db;
+    public static String token;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,8 +44,9 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        hideStatusBar();
+        db = FirebaseFirestore.getInstance();
 
+        hideStatusBar();
         binding.viewPager2.setAdapter(new ViewPagerAdapter(MainActivity.this));
         new TabLayoutMediator(binding.tabLayout, binding.viewPager2, (tab, position) -> {
             switch (position) {
@@ -106,8 +122,32 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w("MainActivity", "Fetching FCM registration token failed", task.getException());
+                            return;
+                        }
+                        // Get new FCM registration token
+                        token = task.getResult();
+                        db.collection("users")
+                                .document(FirebaseAuth.getInstance().getUid())
+                                .update("token", token)
+                                .addOnSuccessListener(aVoid -> {
+                                        }
+                                )
+                                .addOnFailureListener(e -> {
+                                            Log.e("Update", "update token fail");
+                                        }
+                                );
+                    }
+                });
+
     }
 
+    //
     public static void setFragment(int position) {
         binding.viewPager2.setCurrentItem(position);
     }
@@ -122,4 +162,6 @@ public class MainActivity extends AppCompatActivity {
         int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
     }
+
+
 }

@@ -21,7 +21,9 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.hiutin.smapp.adapter.PostCommentAdapter;
+import com.hiutin.smapp.data.model.NotificationModel;
 import com.hiutin.smapp.data.model.PostModel;
+import com.hiutin.smapp.data.repository.NotificationRepository;
 import com.hiutin.smapp.databinding.ActivityPostDetailBinding;
 import com.hiutin.smapp.data.model.CommentModel;
 import com.hiutin.smapp.viewModel.PostDetailActivityViewModel;
@@ -29,6 +31,7 @@ import com.hiutin.smapp.viewModel.PostDetailActivityViewModel;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -51,6 +54,18 @@ public class PostDetailActivity extends AppCompatActivity {
         viewModel.getPostMutableLiveData(postId).observe(this, this::loadPostInformation);
         binding.btnSendComment.setOnClickListener(v -> {
             addComment();
+            NotificationRepository notificationRepository = new NotificationRepository();
+            FirebaseFirestore.getInstance().collection("posts")
+                    .document(postId)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        List<String> listUser = new ArrayList<>();
+                        listUser.add(task.getResult().get("uid").toString());
+                        Timestamp timestamp = Timestamp.now();
+                        NotificationModel model = new NotificationModel(FirebaseAuth.getInstance().getUid(), "đã bình luận bài viết: ", postId, listUser, timestamp);
+                        notificationRepository.addNotification(getApplication(),model,"đã bình luận bài viết ");
+
+                    });
         });
 
         binding.btnBack.setOnClickListener(v -> {

@@ -3,7 +3,7 @@ package com.hiutin.smapp.data.model;
 import java.util.ArrayList;
 
 public class UserModel {
-    private String uid, email, name, avatar, status;
+    private String uid, email, name, avatar, status, token;
     private ArrayList<String> followers;
     private ArrayList<String> following;
 
@@ -18,6 +18,17 @@ public class UserModel {
         this.status = status;
         this.followers = followers;
         this.following = followings;
+    }
+
+    public UserModel(String uid, String email, String name, String avatar, String status, String token, ArrayList<String> followers, ArrayList<String> following) {
+        this.uid = uid;
+        this.email = email;
+        this.name = name;
+        this.avatar = avatar;
+        this.status = status;
+        this.token = token;
+        this.followers = followers;
+        this.following = following;
     }
 
     public String getUid() {
@@ -42,6 +53,14 @@ public class UserModel {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public String getAvatar() {

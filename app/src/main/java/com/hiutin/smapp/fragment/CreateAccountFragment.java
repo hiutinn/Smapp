@@ -133,6 +133,7 @@ public class CreateAccountFragment extends Fragment {
                 user.put("following", new ArrayList<String>());
                 user.put("followers", new ArrayList<String>());
                 user.put("status", "");
+                user.put("token","");
                 db.collection("users").document(auth.getUid())
                         .set(user)
                         .addOnCompleteListener(task1 -> {
