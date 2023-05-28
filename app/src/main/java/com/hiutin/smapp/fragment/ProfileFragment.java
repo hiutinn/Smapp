@@ -2,13 +2,9 @@ package com.hiutin.smapp.fragment;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,20 +14,22 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModel;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.hiutin.smapp.FragmentReplaceActivity;
 import com.hiutin.smapp.MainActivity;
 import com.hiutin.smapp.R;
 import com.hiutin.smapp.adapter.ProfileImageAdapter;
+import com.hiutin.smapp.adapter.SearchAdapter;
+import com.hiutin.smapp.adapter.ChildViewPagerAdapter;
+import com.hiutin.smapp.adapter.ViewPagerAdapter;
+import com.hiutin.smapp.data.model.UserModel;
 import com.hiutin.smapp.databinding.FragmentProfileBinding;
 import com.hiutin.smapp.data.model.PostModel;
 import com.hiutin.smapp.dialog.ConfirmDialog;
@@ -42,11 +40,14 @@ import java.util.List;
 import java.util.Objects;
 
 public class ProfileFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
-    private FragmentProfileBinding binding;
+    public static FragmentProfileBinding binding;
     private boolean isMyProfile;
     private static ProfileFragmentViewModel viewModel;
     ProfileImageAdapter adapter;
     List<PostModel> posts;
+    private boolean checkFollowOnClick;
+    public static int index=0;
+
     public ProfileFragment() {
         // Required empty public constructor
     }
@@ -73,11 +74,36 @@ public class ProfileFragment extends Fragment implements PopupMenu.OnMenuItemCli
         viewModel = new ViewModelProvider(requireActivity()).get(ProfileFragmentViewModel.class);
         viewModel.getUserIdMutableLiveData().observe(getViewLifecycleOwner(), uid -> {
             isMyProfile = Objects.equals(uid, FirebaseAuth.getInstance().getUid());
+
             loadBasicData(uid);
             loadPostImages(uid);
             if (isMyProfile) {
                 binding.btnFollow.setVisibility(View.GONE);
                 binding.countLayout.setVisibility(View.VISIBLE);
+                binding.linearFollowing.setOnClickListener(view1 -> {
+                    usersFollow();
+                    binding.childViewPager.setVisibility(view.VISIBLE);
+                    binding.btnBack.setVisibility(view.VISIBLE);
+                    binding.relative.setVisibility(view.GONE);
+                    MainActivity.binding.viewPager2.setUserInputEnabled(false);
+                    setFragment(0);
+                    checkFollowOnClick = true;
+                    if(index==0){
+                        index++;
+                    }
+                });
+                binding.linearFollower.setOnClickListener(view1 -> {
+                    usersFollow();
+                    binding.childViewPager.setVisibility(view.VISIBLE);
+                    binding.relative.setVisibility(view.GONE);
+                    binding.btnBack.setVisibility(view.VISIBLE);
+                    MainActivity.binding.viewPager2.setUserInputEnabled(false);
+                    setFragment(1);
+                    checkFollowOnClick = true;
+                    if(index==0){
+                        index++;
+                    }
+                });
                 binding.btnBack.setVisibility(View.GONE);
                 binding.imgMenu.setVisibility(View.VISIBLE);
             } else {
@@ -89,9 +115,10 @@ public class ProfileFragment extends Fragment implements PopupMenu.OnMenuItemCli
             }
         });
         binding.btnBack.setOnClickListener(v -> {
-            viewModel.setUserId(FirebaseAuth.getInstance().getUid());
-            MainActivity.setFragment(0);
+            back(index);
+            index--;
         });
+
         binding.imgMenu.setOnClickListener(this::showPopUpMenu);
     }
 
@@ -110,6 +137,7 @@ public class ProfileFragment extends Fragment implements PopupMenu.OnMenuItemCli
             }
         });
     }
+
 
     public static void resetProfileScreen() {
         viewModel.setUserId(FirebaseAuth.getInstance().getUid());
@@ -168,5 +196,65 @@ public class ProfileFragment extends Fragment implements PopupMenu.OnMenuItemCli
             requireActivity().finish();
         });
         confirmDialog.show();
+    }
+
+    private void usersFollow(){
+        binding.viewPager2.setAdapter(new ChildViewPagerAdapter(getActivity()));
+        TabLayoutMediator mediator = new TabLayoutMediator(binding.tabLayoutProfile, binding.viewPager2, new TabLayoutMediator.TabConfigurationStrategy() {
+            @Override
+            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
+                switch (position){
+                    case 0:
+                        tab.setText("Following");
+                        break;
+                    case 1:
+                        tab.setText("Follower");
+                        break;
+                }
+            }
+        });
+        mediator.attach();
+    }
+    private void setFragment(int position) {
+        binding.viewPager2.setCurrentItem(position);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+//        if(checkFollowOnClick == true){
+//            binding.btnBack.setVisibility(View.VISIBLE);
+//        }
+        if(index == 0){
+            viewModel.setUserId(FirebaseAuth.getInstance().getUid());
+            MainActivity.setFragment(4);
+            binding.childViewPager.setVisibility(View.GONE);
+            MainActivity.binding.viewPager2.setUserInputEnabled(true);
+            binding.relative.setVisibility(View.VISIBLE);
+            binding.btnBack.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        index = 0;
+    }
+    private void back(int position){
+        switch (position){
+            case 1:
+                checkFollowOnClick = false;
+                viewModel.setUserId(FirebaseAuth.getInstance().getUid());
+                MainActivity.setFragment(4);
+                binding.childViewPager.setVisibility(View.GONE);
+                MainActivity.binding.viewPager2.setUserInputEnabled(true);
+                binding.relative.setVisibility(View.VISIBLE);
+                binding.btnBack.setVisibility(View.GONE);
+                break;
+            case 2:
+                binding.childViewPager.setVisibility(View.VISIBLE);
+                binding.relative.setVisibility(View.GONE);
+                break;
+        }
     }
 }

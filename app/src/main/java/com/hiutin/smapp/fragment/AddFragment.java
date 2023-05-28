@@ -30,13 +30,19 @@ import com.bumptech.glide.Glide;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.hiutin.smapp.R;
 import com.hiutin.smapp.adapter.GalleryAdapter;
+import com.hiutin.smapp.data.model.NotificationModel;
 import com.hiutin.smapp.data.model.PostModel;
+import com.hiutin.smapp.data.model.UserModel;
+import com.hiutin.smapp.data.repository.NotificationRepository;
+import com.hiutin.smapp.data.repository.UserRepository;
 import com.hiutin.smapp.databinding.FragmentAddBinding;
 import com.hiutin.smapp.data.model.CommentModel;
 import com.hiutin.smapp.dialog.LoadingDialog;
@@ -175,8 +181,22 @@ public class AddFragment extends Fragment implements PopupMenu.OnMenuItemClickLi
         Timestamp timestamp = Timestamp.now();
         newPost.setTimestamp(timestamp.toDate());
         newPost.setUid(FirebaseAuth.getInstance().getUid());
-
         viewModel.addPost(newPost);
+
+        FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getUid())
+                .addSnapshotListener((snapshot, e) -> {
+                    if (e != null) {
+                        Log.e("UserRepository", "Error fetching users" + e.getMessage());
+                        return;
+                    }
+                    if (snapshot != null && snapshot.exists()) {
+                        List<String> followers = (ArrayList<String>) snapshot.get("followers");
+                        NotificationRepository notificationRepository = new NotificationRepository();
+                        NotificationModel model = new NotificationModel(FirebaseAuth.getInstance().getUid(),"đăng bài viết mới: "+newPost.getCaption(),id,followers,timestamp);
+                        notificationRepository.addNotification(getContext(),model,"đăng bài viết mới: "+newPost.getCaption());
+                        //notificationRepository.sendMultipleNotification(getContext());
+                    }
+                });
         resetInput();
         loadingDialog.dismiss();
     }

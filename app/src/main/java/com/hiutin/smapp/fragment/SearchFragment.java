@@ -77,10 +77,13 @@ public class SearchFragment extends Fragment {
                 return false;
             }
         });
-        adapter.onItemClick(uid -> {
-            ProfileFragmentViewModel viewModel = new ViewModelProvider(requireActivity()).get(ProfileFragmentViewModel.class);
-            viewModel.setUserId(uid);
-            MainActivity.setFragment(4);
+        adapter.onItemClick(new SearchAdapter.IOnItemClick() {
+            @Override
+            public void onItemClick(String uid) {
+                ProfileFragmentViewModel viewModel = new ViewModelProvider(requireActivity()).get(ProfileFragmentViewModel.class);
+                viewModel.setUserId(uid);
+                MainActivity.setFragment(4);
+            }
         });
     }
 
