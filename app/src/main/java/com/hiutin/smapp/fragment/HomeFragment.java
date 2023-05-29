@@ -32,6 +32,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.hiutin.smapp.adapter.PostAdapter;
 import com.hiutin.smapp.adapter.PostCommentAdapter;
+import com.hiutin.smapp.data.model.NotificationModel;
+import com.hiutin.smapp.data.repository.NotificationRepository;
 import com.hiutin.smapp.databinding.FragmentHomeBinding;
 import com.hiutin.smapp.data.model.CommentModel;
 import com.hiutin.smapp.data.model.PostModel;
@@ -128,6 +130,18 @@ public class HomeFragment extends Fragment {
 
             viewModel.addComment(selectedPostId, comment);
             binding.edtComment.setText(null);
+            NotificationRepository notificationRepository = new NotificationRepository();
+            FirebaseFirestore.getInstance().collection("posts")
+                    .document(selectedPostId)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        List<String> listUser = new ArrayList<>();
+                        listUser.add(task.getResult().get("uid").toString());
+
+                        NotificationModel model = new NotificationModel(FirebaseAuth.getInstance().getUid(), "đã bình luận bài viết: "+task.getResult().get("caption").toString(), selectedPostId, listUser, timestamp);
+                        notificationRepository.addNotification(getContext(),model,"đã bình luận bài viết ");
+
+                    });
         });
 
         // Play video when it appear
