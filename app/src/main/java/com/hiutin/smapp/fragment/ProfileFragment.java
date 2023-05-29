@@ -119,7 +119,9 @@ public class ProfileFragment extends Fragment implements PopupMenu.OnMenuItemCli
         });
         binding.btnBack.setOnClickListener(v -> {
             back(index);
-            index--;
+            if(index>0){
+                index--;
+            }
         });
 
         binding.imgMenu.setOnClickListener(this::showPopUpMenu);
@@ -245,6 +247,7 @@ public class ProfileFragment extends Fragment implements PopupMenu.OnMenuItemCli
     @Override
     public void onPause() {
         super.onPause();
+        MainActivity.binding.viewPager2.setUserInputEnabled(true);
         index = 0;
     }
     private void back(int position){
@@ -262,6 +265,9 @@ public class ProfileFragment extends Fragment implements PopupMenu.OnMenuItemCli
                 binding.childViewPager.setVisibility(View.VISIBLE);
                 binding.relative.setVisibility(View.GONE);
                 break;
+            case 3:
+                MainActivity.setFragment(1);
+                index =0;
         }
     }
 }
