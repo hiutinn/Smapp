@@ -83,6 +83,7 @@ public class SearchFragment extends Fragment {
                 ProfileFragmentViewModel viewModel = new ViewModelProvider(requireActivity()).get(ProfileFragmentViewModel.class);
                 viewModel.setUserId(uid);
                 MainActivity.setFragment(4);
+                ProfileFragment.index = 3;
             }
         });
     }
