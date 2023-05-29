@@ -23,6 +23,7 @@
             android:layout_height="wrap_content"
             android:maxLines="2"
             android:ellipsize="end"
+            android:textColor="@color/black"
             android:textSize="20dp"
             android:layout_marginLeft="5dp"
             android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi dignissim neque nec tincidunt mattis"

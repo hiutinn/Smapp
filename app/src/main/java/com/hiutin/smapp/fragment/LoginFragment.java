@@ -66,9 +66,6 @@ public class LoginFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         auth = FirebaseAuth.getInstance();
-
-
-
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -159,10 +156,10 @@ public class LoginFragment extends Fragment {
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         auth.signInWithCredential(credential).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(requireActivity());
                 DocumentReference docRef = FirebaseFirestore.getInstance()
                         .collection("users")
-                        .document(Objects.requireNonNull(account.getId()));
+                        .document(Objects.requireNonNull(auth.getUid()));
+
                 docRef.get().addOnCompleteListener(task12 -> {
                     if (task12.isSuccessful()) {
                         DocumentSnapshot document = task12.getResult();
@@ -173,6 +170,7 @@ public class LoginFragment extends Fragment {
                             startActivity(new Intent(getContext(), MainActivity.class));
                             getActivity().finish();
                         } else {
+                            GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(requireActivity());
                             Map<String, Object> user = new HashMap<>();
                             user.put("uid", auth.getUid());
                             user.put("name", account.getDisplayName());

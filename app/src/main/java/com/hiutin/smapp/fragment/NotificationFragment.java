@@ -37,7 +37,6 @@ public class NotificationFragment extends Fragment {
         // Required empty public constructor
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

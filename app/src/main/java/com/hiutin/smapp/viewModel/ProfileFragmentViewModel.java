@@ -53,7 +53,6 @@ public class ProfileFragmentViewModel extends AndroidViewModel {
         if (userIdMutableLiveData == null) {
             userIdMutableLiveData = new MutableLiveData<>();
             userIdMutableLiveData.setValue(FirebaseAuth.getInstance().getUid());
-
         }
         return userIdMutableLiveData;
     }

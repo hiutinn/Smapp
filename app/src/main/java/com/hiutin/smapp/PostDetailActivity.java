@@ -64,7 +64,6 @@ public class PostDetailActivity extends AppCompatActivity {
                         Timestamp timestamp = Timestamp.now();
                         NotificationModel model = new NotificationModel(FirebaseAuth.getInstance().getUid(), "đã bình luận bài viết: ", postId, listUser, timestamp);
                         notificationRepository.addNotification(getApplication(),model,"đã bình luận bài viết ");
-
                     });
         });
 
@@ -94,6 +93,13 @@ public class PostDetailActivity extends AppCompatActivity {
     }
 
     private void loadPostInformation(PostModel post) {
+        viewModel.getUserMutableLiveData(post.getUid()).observe(this, user -> {
+            binding.tvUserName.setText(user.getName());
+            Glide.with(this)
+                    .load(user.getAvatar())
+                    .placeholder(R.drawable.user)
+                    .into(binding.imgUserAvatar);
+        });
         // Time
         binding.tvTime.setText(getTime(post.getTimestamp()));
         // Post image
