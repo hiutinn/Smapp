@@ -44,7 +44,7 @@ public class SearchFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentSearchBinding.inflate(inflater, container, false);
         return binding.getRoot();
@@ -77,13 +77,10 @@ public class SearchFragment extends Fragment {
                 return false;
             }
         });
-        adapter.onItemClick(new SearchAdapter.IOnItemClick() {
-            @Override
-            public void onItemClick(String uid) {
-                ProfileFragmentViewModel viewModel = new ViewModelProvider(requireActivity()).get(ProfileFragmentViewModel.class);
-                viewModel.setUserId(uid);
-                MainActivity.setFragment(4);
-            }
+        adapter.onItemClick(uid -> {
+            ProfileFragmentViewModel viewModel = new ViewModelProvider(requireActivity()).get(ProfileFragmentViewModel.class);
+            viewModel.setUserId(uid);
+            MainActivity.setFragment(4);
         });
     }
 

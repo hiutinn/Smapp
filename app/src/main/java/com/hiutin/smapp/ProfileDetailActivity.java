@@ -86,7 +86,6 @@ public class ProfileDetailActivity extends AppCompatActivity {
                                         });
                             }
                         });
-                return;
             }else {
                 FirebaseFirestore.getInstance().collection("users")
                         .document(FirebaseAuth.getInstance().getUid())

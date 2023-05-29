@@ -81,11 +81,12 @@ public class ProfileFragment extends Fragment implements PopupMenu.OnMenuItemCli
             if (isMyProfile) {
                 binding.btnFollow.setVisibility(View.GONE);
                 binding.countLayout.setVisibility(View.VISIBLE);
+
                 binding.linearFollowing.setOnClickListener(view1 -> {
                     usersFollow();
-                    binding.childViewPager.setVisibility(view.VISIBLE);
-                    binding.btnBack.setVisibility(view.VISIBLE);
-                    binding.relative.setVisibility(view.GONE);
+                    binding.childViewPager.setVisibility(View.VISIBLE);
+                    binding.btnBack.setVisibility(View.VISIBLE);
+                    binding.relative.setVisibility(View.GONE);
                     MainActivity.binding.viewPager2.setUserInputEnabled(false);
                     setFragment(0);
                     checkFollowOnClick = true;
@@ -93,11 +94,12 @@ public class ProfileFragment extends Fragment implements PopupMenu.OnMenuItemCli
                         index++;
                     }
                 });
+
                 binding.linearFollower.setOnClickListener(view1 -> {
                     usersFollow();
-                    binding.childViewPager.setVisibility(view.VISIBLE);
-                    binding.relative.setVisibility(view.GONE);
-                    binding.btnBack.setVisibility(view.VISIBLE);
+                    binding.childViewPager.setVisibility(View.VISIBLE);
+                    binding.relative.setVisibility(View.GONE);
+                    binding.btnBack.setVisibility(View.VISIBLE);
                     MainActivity.binding.viewPager2.setUserInputEnabled(false);
                     setFragment(1);
                     checkFollowOnClick = true;
@@ -230,9 +232,6 @@ public class ProfileFragment extends Fragment implements PopupMenu.OnMenuItemCli
     @Override
     public void onResume() {
         super.onResume();
-//        if(checkFollowOnClick == true){
-//            binding.btnBack.setVisibility(View.VISIBLE);
-//        }
         if(index == 0){
             viewModel.setUserId(FirebaseAuth.getInstance().getUid());
             MainActivity.setFragment(4);

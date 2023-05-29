@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.hiutin.smapp.data.model.CommentModel;
 import com.hiutin.smapp.data.model.PostModel;
+import com.hiutin.smapp.data.model.UserModel;
 import com.hiutin.smapp.data.repository.PostRepository;
 import com.hiutin.smapp.data.repository.UserRepository;
 
@@ -18,6 +19,7 @@ public class PostDetailActivityViewModel extends AndroidViewModel {
     private UserRepository userRepository;
     private MutableLiveData<List<CommentModel>> commentsMutableLiveData;
     private MutableLiveData<PostModel> postMutableLiveData;
+    private MutableLiveData<UserModel> userMutableLiveData;
 
     public PostDetailActivityViewModel(@NonNull Application application) {
         super(application);
@@ -51,5 +53,15 @@ public class PostDetailActivityViewModel extends AndroidViewModel {
 
     public void addComment(String postId, CommentModel comment) {
         postRepository.addComment(postId, comment);
+    }
+
+    public MutableLiveData<UserModel> getUserMutableLiveData(String uid) {
+        if (userMutableLiveData == null) {
+            userMutableLiveData = new MutableLiveData<>();
+        }
+        userRepository.getUserByUid(uid).observeForever(user -> {
+            userMutableLiveData.setValue(user);
+        });
+        return userMutableLiveData;
     }
 }
