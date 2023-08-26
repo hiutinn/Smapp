@@ -64,4 +64,8 @@ public class PostDetailActivityViewModel extends AndroidViewModel {
         });
         return userMutableLiveData;
     }
+
+    public void deletePost(String postId) {
+        postRepository.deletePost(postId);
+    }
 }

@@ -113,8 +113,8 @@ public class PostRepository {
                 .addOnFailureListener(e -> Log.e("PostRepository", "Error updating post", e));
     }
 
-    public void deletePost(PostModel post) {
-        db.collection(COLLECTION_NAME).document(post.getId()).delete()
+    public void deletePost(String postId) {
+        db.collection(COLLECTION_NAME).document(postId).delete()
                 .addOnSuccessListener(aVoid -> Log.d("PostRepository", "Post deleted successfully"))
                 .addOnFailureListener(e -> Log.e("PostRepository", "Error deleting post", e));
     }

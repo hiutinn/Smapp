@@ -3,10 +3,15 @@ package com.hiutin.smapp;
 import static com.hiutin.smapp.utils.TimeHelper.getTime;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.MediaController;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,6 +31,7 @@ import com.hiutin.smapp.data.model.PostModel;
 import com.hiutin.smapp.data.repository.NotificationRepository;
 import com.hiutin.smapp.databinding.ActivityPostDetailBinding;
 import com.hiutin.smapp.data.model.CommentModel;
+import com.hiutin.smapp.dialog.ConfirmDialog;
 import com.hiutin.smapp.viewModel.PostDetailActivityViewModel;
 
 import java.util.ArrayList;
@@ -34,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 
 public class PostDetailActivity extends AppCompatActivity {
     private ActivityPostDetailBinding binding;
@@ -60,7 +67,7 @@ public class PostDetailActivity extends AppCompatActivity {
                     .get()
                     .addOnCompleteListener(task -> {
                         List<String> listUser = new ArrayList<>();
-                        listUser.add(task.getResult().get("uid").toString());
+                        listUser.add(Objects.requireNonNull(task.getResult().get("uid")).toString());
                         Timestamp timestamp = Timestamp.now();
                         NotificationModel model = new NotificationModel(FirebaseAuth.getInstance().getUid(), "đã bình luận bài viết: ", postId, listUser, timestamp);
                         notificationRepository.addNotification(getApplication(),model,"đã bình luận bài viết ");
@@ -70,6 +77,29 @@ public class PostDetailActivity extends AppCompatActivity {
         binding.btnBack.setOnClickListener(v -> {
             finish();
         });
+        binding.btnOption.setOnClickListener(this::showPopUpMenu);
+
+    }
+
+    private void showPopUpMenu(View v) {
+        PopupMenu popup = new PopupMenu(this, v);
+        popup.inflate(R.menu.post_detail_menu);
+        popup.setOnMenuItemClickListener(menuItem -> {
+            if (menuItem.getItemId() == R.id.post_detail_delete) {
+                deletePost();
+                return true;
+            }
+            return false;
+        });
+        popup.show();
+    }
+
+    private void deletePost() {
+        new ConfirmDialog(this, "Are you sure ?", () -> {
+            viewModel.deletePost(postId);
+            Toast.makeText(PostDetailActivity.this, "Post has been deleted", Toast.LENGTH_SHORT).show();
+            finish();
+        }).show();
     }
 
     private void addComment() {
@@ -92,6 +122,7 @@ public class PostDetailActivity extends AppCompatActivity {
         binding.edtComment.setText("");
     }
 
+    @SuppressLint("SetTextI18n")
     private void loadPostInformation(PostModel post) {
         viewModel.getUserMutableLiveData(post.getUid()).observe(this, user -> {
             binding.tvUserName.setText(user.getName());
@@ -99,13 +130,35 @@ public class PostDetailActivity extends AppCompatActivity {
                     .load(user.getAvatar())
                     .placeholder(R.drawable.user)
                     .into(binding.imgUserAvatar);
+            if (user.getUid().equals(FirebaseAuth.getInstance().getUid())) {
+                binding.btnOption.setVisibility(View.VISIBLE);
+            }
         });
         // Time
         binding.tvTime.setText(getTime(post.getTimestamp()));
         // Post image
-        Glide.with(this)
-                .load(post.getPostImage())
-                .into(binding.imgPost);
+        if (post.getPostImage() != null) {
+            binding.vdPost.setVisibility(View.GONE);
+            binding.imgPost.setVisibility(View.VISIBLE);
+            Random random = new Random();
+            int color = Color.argb(255, random.nextInt(256), random.nextInt(256), random.nextInt(256));
+            Glide
+                    .with(this)
+                    .load(post.getPostImage())
+                    .centerCrop()
+                    .timeout(7000)
+                    .placeholder(new ColorDrawable(color))
+                    .into(binding.imgPost);
+        }
+
+        if (post.getPostVideo() != null) {
+            binding.imgPost.setVisibility(View.GONE);
+            binding.vdPost.setVisibility(View.VISIBLE);
+            MediaController mediaController = new MediaController(this);
+            mediaController.setAnchorView(binding.vdPost);
+            binding.vdPost.setVideoPath(post.getPostVideo());
+            binding.vdPost.setMediaController(mediaController);
+        }
         // Set caption text
         binding.tvCaption.setText(post.getCaption());
         // Handle like button
@@ -162,10 +215,6 @@ public class PostDetailActivity extends AppCompatActivity {
     }
 
     public void hideStatusBar() {
-        if (Build.VERSION.SDK_INT < 16) {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        }
         View decorView = getWindow().getDecorView();
         // Hide the status bar.
         int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;

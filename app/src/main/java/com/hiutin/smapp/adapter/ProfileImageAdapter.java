@@ -44,7 +44,9 @@ public class ProfileImageAdapter extends RecyclerView.Adapter<ProfileImageAdapte
         }
 
         if (post.getPostVideo() != null) {
-
+            Glide.with(context)
+                    .load(post.getPostVideo())
+                    .into(holder.binding.postImage);
         }
         holder.binding.postImage.setOnClickListener(v -> {
             Intent postDetailIntent = new Intent(context, PostDetailActivity.class);

@@ -54,7 +54,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                                             .load(documentSnapshot.get("avatar"))
                                             .placeholder(R.drawable.user)
                                             .into(holder.binding.imageUser);
-                                    String chuoi = documentSnapshot.get("name")+" "+notificationModel.getContent();
+                                    String chuoi = documentSnapshot.get("name") + " " + notificationModel.getContent();
                                     String name = documentSnapshot.get("name").toString();
                                     spanable(chuoi,holder.binding.tvContent,name.length());
                                     holder.binding.tvTime.setText(TimeHelper.getTime(notificationModel.getTimestamp().toDate()));
@@ -80,7 +80,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
         StyleSpan boldStyle = new StyleSpan(Typeface.BOLD);
         spannable.setSpan(boldStyle, 0, index, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannable.setSpan(new AbsoluteSizeSpan(70), 0, index, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannable.setSpan(new AbsoluteSizeSpan(30), 0, index, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         textView.setText(spannable);
     }
 

@@ -36,6 +36,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.hiutin.smapp.MainActivity;
 import com.hiutin.smapp.R;
 import com.hiutin.smapp.adapter.GalleryAdapter;
 import com.hiutin.smapp.data.model.NotificationModel;
@@ -161,7 +162,6 @@ public class AddFragment extends Fragment implements PopupMenu.OnMenuItemClickLi
             return;
         }
          uploadData(null);
-
     }
 
     private void uploadData(String url) {
@@ -199,6 +199,7 @@ public class AddFragment extends Fragment implements PopupMenu.OnMenuItemClickLi
                 });
         resetInput();
         loadingDialog.dismiss();
+        MainActivity.setFragment(0);
     }
 
     @Override

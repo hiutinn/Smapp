@@ -1,6 +1,7 @@
 package com.hiutin.smapp.fragment;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -19,6 +20,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.hiutin.smapp.MainActivity;
+import com.hiutin.smapp.OtherUserProfileActivity;
 import com.hiutin.smapp.adapter.SearchAdapter;
 import com.hiutin.smapp.databinding.FragmentSearchBinding;
 import com.hiutin.smapp.data.model.UserModel;
@@ -77,15 +79,12 @@ public class SearchFragment extends Fragment {
                 return false;
             }
         });
-        adapter.onItemClick(new SearchAdapter.IOnItemClick() {
-            @Override
-            public void onItemClick(String uid) {
-                ProfileFragmentViewModel viewModel = new ViewModelProvider(requireActivity()).get(ProfileFragmentViewModel.class);
-                viewModel.setUserId(uid);
-                MainActivity.setFragment(4);
-                ProfileFragment.index = 3;
-            }
+        adapter.onItemClick(uid -> {
+            Intent intent = new Intent(requireContext(), OtherUserProfileActivity.class);
+            intent.putExtra("uid", uid);
+            requireContext().startActivity(intent);
         });
+
     }
 
     @SuppressLint("NotifyDataSetChanged")

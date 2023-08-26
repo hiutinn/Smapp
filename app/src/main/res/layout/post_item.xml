@@ -27,7 +27,7 @@
                 android:id="@+id/tvUserName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Alexander"
+                android:text=""
                 android:textStyle="bold"
                 android:textColor="@color/black"
                 android:textSize="16sp"/>
@@ -35,7 +35,7 @@
                 android:id="@+id/tvTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="2h"
+                android:text=""
                 android:textColor="#ccc"
                 android:textStyle="bold"
                 android:textSize="14sp"/>
@@ -62,7 +62,7 @@
             android:id="@+id/imgPost"
             android:layout_width="match_parent"
             android:scaleType="center"
-            android:layout_height="220dp"
+            android:layout_height="250dp"
             android:background="@color/black"
             android:visibility="gone"
             android:contentDescription="@null" />
@@ -101,7 +101,7 @@
         android:id="@+id/tvLikeCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="100 likes"
+        android:text=""
         android:textColor="@color/black"
         android:textSize="16dp"
         android:textStyle="bold"

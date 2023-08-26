@@ -60,7 +60,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         reference.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 UserModel userModel = task.getResult().toObject(UserModel.class);
-                assert userModel != null;
+                if (userModel == null) return;
                 Glide
                         .with(context)
                         .load(userModel.getAvatar())

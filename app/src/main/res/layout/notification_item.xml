@@ -24,9 +24,9 @@
             android:maxLines="2"
             android:ellipsize="end"
             android:textColor="@color/black"
-            android:textSize="20dp"
+            android:textSize="16dp"
             android:layout_marginLeft="5dp"
-            android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi dignissim neque nec tincidunt mattis"
+            android:text=""
             />
         <TextView
             android:id="@+id/tvTime"
@@ -34,7 +34,8 @@
             android:layout_height="wrap_content"
             android:textSize="14dp"
             android:layout_marginLeft="10dp"
-            android:text="2 giờ"/>
+            android:text="2 giờ"
+            android:textColor="#ccc"/>
     </LinearLayout>
     <View
         android:layout_width="match_parent"

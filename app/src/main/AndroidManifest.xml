@@ -22,8 +22,11 @@
         android:theme="@style/Theme.SMApp"
         tools:targetApi="31">
         <activity
+            android:name=".OtherUserProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".ProfileDetailActivity"
-            android:exported="false"/>
+            android:exported="false" />
 
         <service
             android:name=".notification.fcm.MyFirebaseMessagingService"

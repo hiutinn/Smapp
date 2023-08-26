@@ -212,17 +212,14 @@ public class ProfileFragment extends Fragment implements PopupMenu.OnMenuItemCli
 
     private void usersFollow(){
         binding.viewPager2.setAdapter(new ChildViewPagerAdapter(getActivity()));
-        TabLayoutMediator mediator = new TabLayoutMediator(binding.tabLayoutProfile, binding.viewPager2, new TabLayoutMediator.TabConfigurationStrategy() {
-            @Override
-            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
-                switch (position){
-                    case 0:
-                        tab.setText("Following");
-                        break;
-                    case 1:
-                        tab.setText("Follower");
-                        break;
-                }
+        TabLayoutMediator mediator = new TabLayoutMediator(binding.tabLayoutProfile, binding.viewPager2, (tab, position) -> {
+            switch (position){
+                case 0:
+                    tab.setText("Following");
+                    break;
+                case 1:
+                    tab.setText("Follower");
+                    break;
             }
         });
         mediator.attach();
